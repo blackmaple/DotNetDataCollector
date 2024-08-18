@@ -4,6 +4,8 @@ VisualStudioVersion = 17.12.35209.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetDataCollector", "DotNetDataCollector\DotNetDataCollector.csproj", "{9B242BDD-4375-48B5-B66F-9429E84EE561}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetDataCollector.DebugApi", "DotNetDataCollector.DebugApi\DotNetDataCollector.DebugApi.csproj", "{17951C77-2350-4CDD-967D-10FB8EEBCCF3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,6 +16,10 @@ Global
 		{9B242BDD-4375-48B5-B66F-9429E84EE561}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B242BDD-4375-48B5-B66F-9429E84EE561}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B242BDD-4375-48B5-B66F-9429E84EE561}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17951C77-2350-4CDD-967D-10FB8EEBCCF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17951C77-2350-4CDD-967D-10FB8EEBCCF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17951C77-2350-4CDD-967D-10FB8EEBCCF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17951C77-2350-4CDD-967D-10FB8EEBCCF3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
