@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetDataCollector", "DotN
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetDataCollector.DebugApi", "DotNetDataCollector.DebugApi\DotNetDataCollector.DebugApi.csproj", "{17951C77-2350-4CDD-967D-10FB8EEBCCF3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetDataCollector.Test", "DotNetDataCollector.Test\DotNetDataCollector.Test.csproj", "{5F48FB8E-EDE3-4CD8-86CB-6E9C19920519}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{17951C77-2350-4CDD-967D-10FB8EEBCCF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17951C77-2350-4CDD-967D-10FB8EEBCCF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17951C77-2350-4CDD-967D-10FB8EEBCCF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F48FB8E-EDE3-4CD8-86CB-6E9C19920519}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F48FB8E-EDE3-4CD8-86CB-6E9C19920519}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F48FB8E-EDE3-4CD8-86CB-6E9C19920519}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F48FB8E-EDE3-4CD8-86CB-6E9C19920519}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
