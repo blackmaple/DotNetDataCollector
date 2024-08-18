@@ -18,19 +18,19 @@ namespace DotNetDataCollector.DebugApi
         [MarshalAs(UnmanagedType.FunctionPtr)]
         readonly delegate* unmanaged[Stdcall]<
             int,
-            out nint*,
-            out char**,
+            out nint,
+            out nint,
             out int,
             int> _func = (delegate* unmanaged[Stdcall]<
             int,
-            out nint*,
-            out char**,
+            out nint,
+            out nint,
             out int,
             int>)ptr;
 
         public int Invoke(int debuggeePID,
-            out nint* ppHandleArrayOut,
-            out char** ppStringArrayOut,
+            out nint ppHandleArrayOut,
+            out nint ppStringArrayOut,
             out int pdwArrayLengthOut)
         {
             return _func(debuggeePID, out ppHandleArrayOut, out ppStringArrayOut, out pdwArrayLengthOut);

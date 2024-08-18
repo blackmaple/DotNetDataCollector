@@ -10,7 +10,7 @@
     [in]  DWORD*     dwArrayLength
 );
          */
-        readonly delegate* unmanaged[Stdcall]<nint*, char**, int, int> _func = (delegate* unmanaged[Stdcall]<nint*, char**, int, int>)ptr;
+        readonly delegate* unmanaged[Stdcall]<nint, nint, int, int> _func = (delegate* unmanaged[Stdcall]<nint, nint, int, int>)ptr;
 
         public static implicit operator Api_CloseCLREnumeration(nint ptr) => new(ptr);
         public static implicit operator nint(Api_CloseCLREnumeration fun) => (nint)fun._func;
@@ -20,6 +20,6 @@
         }
 
 
-        public int Invoke(nint* pHandleArray, char** pStringArray, int dwArrayLength) => _func(pHandleArray, pStringArray, dwArrayLength);
+        public int Invoke(nint pHandleArray, nint pStringArray, int dwArrayLength) => _func(pHandleArray, pStringArray, dwArrayLength);
     }
 }

@@ -4,6 +4,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.Marshalling;
+using System.Security;
 
 namespace DotNetDataCollector.DebugApi
 {
@@ -175,30 +177,124 @@ namespace DotNetDataCollector.DebugApi
 
 
         #region Test
-        public unsafe void Get()
+        public bool TryGetCLRs([MaybeNullWhen(false)] out DotNetClrInfo[] dotNetClrInfos)
         {
-            EnumerateCLRs.Invoke(Environment.ProcessId, out var ppHandleArrayOut, out var ppStringArrayOut, out var pdwArrayLengthOut);
-            var handles = new ReadOnlySpan<nint>(ppHandleArrayOut, pdwArrayLengthOut);
-            foreach (var h in handles)
-            {
-                this.Logger.LogInformation("handle:{h}", h.ToString("X8"));
-            }
-            var lpStrs = new ReadOnlySpan<nint>(ppStringArrayOut, pdwArrayLengthOut);
+            Unsafe.SkipInit(out dotNetClrInfos);
 
-            foreach (var lpStr in lpStrs)
+            var tryCount = 0;
+            while (tryCount < 16)
             {
-                this.Logger.LogInformation("str:{s}", new string((char*)lpStr));
+                UnmanagedHRESULT hr = EnumerateCLRs.Invoke(Environment.ProcessId, out var ppHandleArrayOut, out var ppStringArrayOut, out var pdwArrayLengthOut);
+                if (hr.OK())
+                {
+                    try
+                    {
+                        dotNetClrInfos = EnumDotNetClrInfo(ppHandleArrayOut, ppStringArrayOut, pdwArrayLengthOut).ToArray();
+                        return true;
+                    }
+                    finally
+                    {
+                        CloseCLREnumeration.Invoke(ppHandleArrayOut, ppStringArrayOut, pdwArrayLengthOut);
+                    }
+
+                }
+
+                /*
+                // EnumerateCLRs uses the OS API CreateToolhelp32Snapshot which can return ERROR_BAD_LENGTH or
+                // ERROR_PARTIAL_COPY. If we get either of those, we try wait 1/10th of a second try again (that
+                // is the recommendation of the OS API owners).
+                 */
+                if (hr == UnmanagedHRESULT.HRESULT_ERROR_PARTIAL_COPY || hr == UnmanagedHRESULT.HRESULT_ERROR_BAD_LENGTH)
+                {
+                    break;
+                }
+                Thread.Sleep(100);
+                ++tryCount;
+            }
+            return false;
+
+            static IEnumerable<DotNetClrInfo> EnumDotNetClrInfo(nint ppHandleArrayOut, nint ppStringArrayOut, int pdwArrayLengthOut)
+            {
+                var handles = new UnmanagedArray<nint>(ppHandleArrayOut, pdwArrayLengthOut);
+                var lpwstrs = new UnmanagedArray<UnmanagedLPWStr>(ppStringArrayOut, pdwArrayLengthOut);
+                for (int i = 0; i < pdwArrayLengthOut; ++i)
+                {
+                    var handle = handles[i % pdwArrayLengthOut];
+                    var str = lpwstrs[i % pdwArrayLengthOut];
+                    yield return new DotNetClrInfo(handle, str.ToString());
+                }
+            }
+        }
+
+        public void Test()
+        {
+            UnmanagedHRESULT hr = CLRCreateInstance.Invoke(CLSID_ICLRDebugging, IID_ICLRDebugging, out var ppInterface);
+            if (hr.OK())
+            {
+                var cw = new StrategyBasedComWrappers();
+               // var foo = new CLRDebugging();
+              //  nint iptr = cw.GetOrCreateComInterfaceForObject(foo, CreateComInterfaceFlags.None);
+                ICLRDebugging f = (ICLRDebugging)cw.GetOrCreateObjectForComInstance(ppInterface, CreateObjectFlags.None);
             }
 
-            CloseCLREnumeration.Invoke(ppHandleArrayOut, ppStringArrayOut, pdwArrayLengthOut);
         }
         #endregion
     }
 
+    [GeneratedComInterface]
+    [Guid("BACC578D-FBDD-48A4-969F-02D932B74634")]
+    internal partial interface ICLRDebugging
+    {
+        [PreserveSig]
+        public int OpenVirtualProcess(
+        [MarshalAs(UnmanagedType.SysInt)] nint moduleBaseAddress,
+        [MarshalAs(UnmanagedType.SysInt)] nint dataTarget,
+        [MarshalAs(UnmanagedType.SysInt)] nint libraryProvider,
+        in ClrDebuggingVersion maxDebuggerSupportedVersion,
+        in Guid riidProcess,
+        out IntPtr process,
+        out ClrDebuggingVersion version,
+        out ClrDebuggingProcessFlags flags);
 
+    }
 
+    [GeneratedComClass]
+    //[Guid("D28F3C5A-9634-4206-A509-477552EEFB10")]
+    internal partial class CLRDebugging : ICLRDebugging
+    {
+        public int OpenVirtualProcess([MarshalAs(UnmanagedType.SysInt)] nint moduleBaseAddress, [MarshalAs(UnmanagedType.SysInt)] nint dataTarget, [MarshalAs(UnmanagedType.SysInt)] nint libraryProvider, in ClrDebuggingVersion maxDebuggerSupportedVersion, in Guid riidProcess, out nint process, out ClrDebuggingVersion version, out ClrDebuggingProcessFlags flags)
+        {
+            throw new NotImplementedException();
+        }
+    }
     public class Test_DebugApiLoader(ILogger<Test_DebugApiLoader> logger) : DebugApiLoader(logger)
     {
         public bool Test_TryLoadDotNetDebugApi() => TryLoadDotNetDebugApi();
+    }
+
+
+    public readonly struct DotNetClrInfo(nint handle, string? dll)
+    {
+        public nint Handle { get; } = handle;
+        public string? Dll { get; } = dll;
+
+    }
+
+
+
+    public struct ClrDebuggingVersion
+    {
+        public short StructVersion;
+        public short Major;
+        public short Minor;
+        public short Build;
+        public short Revision;
+    }
+
+    public enum ClrDebuggingProcessFlags
+    {
+        // This CLR has a non-catchup managed debug event to send after jit attach is complete
+        ManagedDebugEventPending = 1,
+        ManagedDebugEventDebuggerLaunch = 2
     }
 }
