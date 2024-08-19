@@ -215,12 +215,11 @@ namespace DotNetDataCollector.DebugApi
 
             static IEnumerable<DotNetClrInfo> EnumDotNetClrInfo(nint ppHandleArrayOut, nint ppStringArrayOut, int pdwArrayLengthOut)
             {
-                var handles = new UnmanagedArray<nint>(ppHandleArrayOut, pdwArrayLengthOut);
-                var lpwstrs = new UnmanagedArray<UnmanagedLPWStr>(ppStringArrayOut, pdwArrayLengthOut);
                 for (int i = 0; i < pdwArrayLengthOut; ++i)
                 {
-                    var handle = handles[i % pdwArrayLengthOut];
-                    var str = lpwstrs[i % pdwArrayLengthOut];
+                    var index = i % pdwArrayLengthOut;
+                    var handle = UnmanagedArray<nint>.RefElementAt(ppHandleArrayOut, index);
+                    var str = UnmanagedArray<UnmanagedLPWStr>.RefElementAt(ppStringArrayOut, index);
                     yield return new DotNetClrInfo(handle, str.ToString());
                 }
             }
@@ -232,52 +231,19 @@ namespace DotNetDataCollector.DebugApi
             if (hr.OK())
             {
                 var cw = new StrategyBasedComWrappers();
-               // var foo = new CLRDebugging();
-              //  nint iptr = cw.GetOrCreateComInterfaceForObject(foo, CreateComInterfaceFlags.None);
-                ICLRDebugging f = (ICLRDebugging)cw.GetOrCreateObjectForComInstance(ppInterface, CreateObjectFlags.None);
+                ICLRDebugging clrDebugging = (ICLRDebugging)cw.GetOrCreateObjectForComInstance(ppInterface, CreateObjectFlags.None);
             }
 
         }
         #endregion
     }
 
-    [GeneratedComInterface]
-    [Guid("BACC578D-FBDD-48A4-969F-02D932B74634")]
-    internal partial interface ICLRDebugging
-    {
-        [PreserveSig]
-        public int OpenVirtualProcess(
-        [MarshalAs(UnmanagedType.SysInt)] nint moduleBaseAddress,
-        [MarshalAs(UnmanagedType.SysInt)] nint dataTarget,
-        [MarshalAs(UnmanagedType.SysInt)] nint libraryProvider,
-        in ClrDebuggingVersion maxDebuggerSupportedVersion,
-        in Guid riidProcess,
-        out IntPtr process,
-        out ClrDebuggingVersion version,
-        out ClrDebuggingProcessFlags flags);
 
-    }
 
-    [GeneratedComClass]
-    //[Guid("D28F3C5A-9634-4206-A509-477552EEFB10")]
-    internal partial class CLRDebugging : ICLRDebugging
-    {
-        public int OpenVirtualProcess([MarshalAs(UnmanagedType.SysInt)] nint moduleBaseAddress, [MarshalAs(UnmanagedType.SysInt)] nint dataTarget, [MarshalAs(UnmanagedType.SysInt)] nint libraryProvider, in ClrDebuggingVersion maxDebuggerSupportedVersion, in Guid riidProcess, out nint process, out ClrDebuggingVersion version, out ClrDebuggingProcessFlags flags)
-        {
-            throw new NotImplementedException();
-        }
-    }
+
     public class Test_DebugApiLoader(ILogger<Test_DebugApiLoader> logger) : DebugApiLoader(logger)
     {
         public bool Test_TryLoadDotNetDebugApi() => TryLoadDotNetDebugApi();
-    }
-
-
-    public readonly struct DotNetClrInfo(nint handle, string? dll)
-    {
-        public nint Handle { get; } = handle;
-        public string? Dll { get; } = dll;
-
     }
 
 
