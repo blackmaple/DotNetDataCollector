@@ -177,6 +177,9 @@ namespace DotNetDataCollector.DebugApi
 
 
         #region Test
+
+
+        //CorDebugDataTargetWrapper
         public bool TryGetCLRs([MaybeNullWhen(false)] out DotNetClrInfo[] dotNetClrInfos)
         {
             Unsafe.SkipInit(out dotNetClrInfos);
@@ -225,16 +228,23 @@ namespace DotNetDataCollector.DebugApi
             }
         }
 
-        public void Test()
+        public bool TryCLRCreateInstance([MaybeNullWhen(false)]out ICLRDebugging clrDebugging)
         {
+            Unsafe.SkipInit(out clrDebugging);
             UnmanagedHRESULT hr = CLRCreateInstance.Invoke(CLSID_ICLRDebugging, IID_ICLRDebugging, out var ppInterface);
             if (hr.OK())
             {
                 var cw = new StrategyBasedComWrappers();
-                ICLRDebugging clrDebugging = (ICLRDebugging)cw.GetOrCreateObjectForComInstance(ppInterface, CreateObjectFlags.None);
+                if (cw.GetOrCreateObjectForComInstance(ppInterface, CreateObjectFlags.None) is ICLRDebugging debugging)
+                { 
+                    clrDebugging = debugging;
+                    return true;
+                }
             }
-
+            return false;
         }
+
+      
         #endregion
     }
 

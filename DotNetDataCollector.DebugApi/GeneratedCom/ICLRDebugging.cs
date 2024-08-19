@@ -5,7 +5,7 @@ namespace DotNetDataCollector.DebugApi
 {
     [GeneratedComInterface]
     [Guid("D28F3C5A-9634-4206-A509-477552EEFB10")]
-    internal partial interface ICLRDebugging
+    public partial interface ICLRDebugging
     {
         [PreserveSig]
         public int OpenVirtualProcess(

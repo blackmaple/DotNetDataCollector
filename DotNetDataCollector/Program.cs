@@ -25,6 +25,9 @@ if (debugapi.TryGetCLRs(out var dotNetClrInfos))
         Console.WriteLine(assembly.Dll);
     }
 }
-debugapi.Test();
+if (debugapi.TryCLRCreateInstance(out var clrDebugging))
+{
+    Console.WriteLine(clrDebugging is not null);
 
+}
 Console.ReadKey();
